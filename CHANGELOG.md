@@ -1,6 +1,11 @@
 # Ignite UI for Angular Change Log
 
 All notable changes for each version of this project will be documented in this file.
+## 11.0.0
+
+### New Features
+- `IgxInput` now supports `type="file"` and its styling upon all themes.
+
 ## 10.2.0
 
 ### General

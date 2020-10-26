@@ -9,18 +9,31 @@ import {
     Input,
     OnDestroy,
     Optional,
-    Self
+    Self,
 } from '@angular/core';
-import { AbstractControl, FormControlName, NgControl, NgModel } from '@angular/forms';
+import {
+    AbstractControl,
+    FormControlName,
+    NgControl,
+    NgModel,
+} from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { IgxInputGroupBase } from '../../input-group/input-group.common';
 
-const nativeValidationAttributes = ['required', 'pattern', 'minlength', 'maxlength', 'min', 'max', 'step'];
+const nativeValidationAttributes = [
+    'required',
+    'pattern',
+    'minlength',
+    'maxlength',
+    'min',
+    'max',
+    'step',
+];
 
 export enum IgxInputState {
     INITIAL,
     VALID,
-    INVALID
+    INVALID,
 }
 
 /**
@@ -46,18 +59,25 @@ export enum IgxInputState {
  */
 @Directive({
     selector: '[igxInput]',
-    exportAs: 'igxInput'
+    exportAs: 'igxInput',
 })
 export class IgxInputDirective implements AfterViewInit, OnDestroy {
     private _valid = IgxInputState.INITIAL;
     private _statusChanges$: Subscription;
+    private _filePlaceholder = 'No file chosen';
+    private _fileNames = this._filePlaceholder;
+
 
     constructor(
         public inputGroup: IgxInputGroupBase,
         @Optional() @Self() @Inject(NgModel) protected ngModel: NgModel,
-        @Optional() @Self() @Inject(FormControlName) protected formControl: FormControlName,
+        @Optional()
+        @Self()
+        @Inject(FormControlName)
+        protected formControl: FormControlName,
         protected element: ElementRef<HTMLInputElement>,
-        protected cdr: ChangeDetectorRef) { }
+        protected cdr: ChangeDetectorRef
+    ) {}
 
     private get ngControl(): NgControl {
         return this.ngModel ? this.ngModel : this.formControl;
@@ -208,7 +228,10 @@ export class IgxInputDirective implements AfterViewInit, OnDestroy {
             if (!this.ngControl.valid) {
                 this._valid = IgxInputState.INVALID;
             }
-        } else if (this._hasValidators() && !this.nativeElement.checkValidity()) {
+        } else if (
+            this._hasValidators() &&
+            !this.nativeElement.checkValidity()
+        ) {
             this._valid = IgxInputState.INVALID;
         }
     }
@@ -224,21 +247,79 @@ export class IgxInputDirective implements AfterViewInit, OnDestroy {
      * @hidden
      * @internal
      */
+    @HostListener('change', ['$event'])
+    change(event: Event) {
+        if (this.type === 'file') {
+            const fileList: FileList | null = (<HTMLInputElement>event.target)
+                .files;
+            const fileArray: File[] = [];
+
+            if (fileList) {
+                for (let i = 0; i < fileList.length; i++) {
+                    fileArray.push(fileList[i]);
+                }
+            }
+
+            this._fileNames = (fileArray || []).map((f: File) => f.name).join(', ');
+
+            if (!this._fileNames) {
+                this._fileNames = this._filePlaceholder;
+            }
+
+            if (this.required && fileList?.length > 0) {
+                this._valid = IgxInputState.INITIAL;
+            }
+        }
+    }
+
+    /**
+     * @hidden
+     * @internal
+     */
+    public get fileNames() {
+        return this._fileNames;
+    }
+
+    /**
+     * @hidden
+     * @internal
+     */
+    public clear() {
+        this.nativeElement.value = null;
+        this._fileNames = this._filePlaceholder;
+        this.checkValidity();
+    }
+
+    /**
+     * @hidden
+     * @internal
+     */
     public ngAfterViewInit() {
-        this.inputGroup.hasPlaceholder = this.nativeElement.hasAttribute('placeholder');
-        this.inputGroup.disabled = this.inputGroup.disabled || this.nativeElement.hasAttribute('disabled');
-        this.inputGroup.isRequired = this.nativeElement.hasAttribute('required');
+        this.inputGroup.hasPlaceholder = this.nativeElement.hasAttribute(
+            'placeholder'
+        );
+        this.inputGroup.disabled =
+            this.inputGroup.disabled ||
+            this.nativeElement.hasAttribute('disabled');
+        this.inputGroup.isRequired = this.nativeElement.hasAttribute(
+            'required'
+        );
 
         // Make sure we do not invalidate the input on init
         if (!this.ngControl) {
             this._valid = IgxInputState.INITIAL;
         }
         // Also check the control's validators for required
-        if (!this.inputGroup.isRequired && this.ngControl && this.ngControl.control.validator) {
-            const validation = this.ngControl.control.validator({} as AbstractControl);
+        if (
+            !this.inputGroup.isRequired &&
+            this.ngControl &&
+            this.ngControl.control.validator
+        ) {
+            const validation = this.ngControl.control.validator(
+                {} as AbstractControl
+            );
             this.inputGroup.isRequired = validation && validation.required;
         }
-
 
         const elTag = this.nativeElement.tagName.toLowerCase();
         if (elTag === 'textarea') {
@@ -248,7 +329,9 @@ export class IgxInputDirective implements AfterViewInit, OnDestroy {
         }
 
         if (this.ngControl) {
-            this._statusChanges$ = this.ngControl.statusChanges.subscribe(this.onStatusChanged.bind(this));
+            this._statusChanges$ = this.ngControl.statusChanges.subscribe(
+                this.onStatusChanged.bind(this)
+            );
         }
 
         this.cdr.detectChanges();
@@ -293,15 +376,25 @@ export class IgxInputDirective implements AfterViewInit, OnDestroy {
         if (this.disabled !== this.ngControl.disabled) {
             this.disabled = this.ngControl.disabled;
         }
-        if (this.ngControl.control.validator || this.ngControl.control.asyncValidator) {
-            if (this.ngControl.control.touched || this.ngControl.control.dirty) {
+        if (
+            this.ngControl.control.validator ||
+            this.ngControl.control.asyncValidator
+        ) {
+            if (
+                this.ngControl.control.touched ||
+                this.ngControl.control.dirty
+            ) {
                 //  TODO: check the logic when control is touched or dirty
                 if (this.inputGroup.isFocused) {
                     // the user is still typing in the control
-                    this._valid = this.ngControl.valid ? IgxInputState.VALID : IgxInputState.INVALID;
+                    this._valid = this.ngControl.valid
+                        ? IgxInputState.VALID
+                        : IgxInputState.INVALID;
                 } else {
                     // the user had touched the control previously but now the value is changing due to changes in the form
-                    this._valid = this.ngControl.valid ? IgxInputState.INITIAL : IgxInputState.INVALID;
+                    this._valid = this.ngControl.valid
+                        ? IgxInputState.INITIAL
+                        : IgxInputState.INVALID;
                 }
             } else {
                 //  if control is untouched and pristine its state is initial. This is when user did not interact
@@ -346,7 +439,11 @@ export class IgxInputDirective implements AfterViewInit, OnDestroy {
             }
         }
 
-        return !!this.ngControl && (!!this.ngControl.control.validator || !!this.ngControl.control.asyncValidator);
+        return (
+            !!this.ngControl &&
+            (!!this.ngControl.control.validator ||
+                !!this.ngControl.control.asyncValidator)
+        );
     }
 
     /**
@@ -404,7 +501,19 @@ export class IgxInputDirective implements AfterViewInit, OnDestroy {
      */
     private checkValidity() {
         if (!this.ngControl && this._hasValidators()) {
-            this._valid = this.nativeElement.checkValidity() ? IgxInputState.VALID : IgxInputState.INVALID;
+            this._valid = this.nativeElement.checkValidity()
+                ? IgxInputState.VALID
+                : IgxInputState.INVALID;
         }
+    }
+
+    /**
+     * Returns the input type.
+     *
+     * @hidden
+     * @internal
+     */
+    public get type() {
+        return this.nativeElement.type;
     }
 }
