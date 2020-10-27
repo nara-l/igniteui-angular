@@ -235,32 +235,18 @@ export class IgxInputDirective implements AfterViewInit, OnDestroy {
             this._valid = IgxInputState.INVALID;
         }
     }
-    /**
-     * @hidden
-     * @internal
-     */
+    /** @hidden @internal */
     @HostListener('input')
     public onInput() {
         this.checkValidity();
     }
-    /**
-     * @hidden
-     * @internal
-     */
+    /** @hidden @internal */
     @HostListener('change', ['$event'])
     change(event: Event) {
         if (this.type === 'file') {
             const fileList: FileList | null = (<HTMLInputElement>event.target)
                 .files;
-            const fileArray: File[] = [];
-
-            if (fileList) {
-                for (let i = 0; i < fileList.length; i++) {
-                    fileArray.push(fileList[i]);
-                }
-            }
-
-            this._fileNames = (fileArray || []).map((f: File) => f.name).join(', ');
+            this._fileNames = Array.from(fileList).map((f: File) => f.name).join(', ');
 
             if (!this._fileNames) {
                 this._fileNames = this._filePlaceholder;
@@ -272,28 +258,19 @@ export class IgxInputDirective implements AfterViewInit, OnDestroy {
         }
     }
 
-    /**
-     * @hidden
-     * @internal
-     */
+    /** @hidden @internal */
     public get fileNames() {
         return this._fileNames;
     }
 
-    /**
-     * @hidden
-     * @internal
-     */
+    /** @hidden @internal */
     public clear() {
         this.nativeElement.value = null;
         this._fileNames = this._filePlaceholder;
         this.checkValidity();
     }
 
-    /**
-     * @hidden
-     * @internal
-     */
+    /** @hidden @internal */
     public ngAfterViewInit() {
         this.inputGroup.hasPlaceholder = this.nativeElement.hasAttribute(
             'placeholder'
@@ -336,10 +313,7 @@ export class IgxInputDirective implements AfterViewInit, OnDestroy {
 
         this.cdr.detectChanges();
     }
-    /**
-     * @hidden
-     * @internal
-     */
+    /** @hidden @internal */
     public ngOnDestroy() {
         if (this._statusChanges$) {
             this._statusChanges$.unsubscribe();
@@ -367,10 +341,7 @@ export class IgxInputDirective implements AfterViewInit, OnDestroy {
     public get nativeElement() {
         return this.element.nativeElement;
     }
-    /**
-     * @hidden
-     * @internal
-     */
+    /** @hidden @internal */
     protected onStatusChanged() {
         // Enable/Disable control based on ngControl #7086
         if (this.disabled !== this.ngControl.disabled) {
