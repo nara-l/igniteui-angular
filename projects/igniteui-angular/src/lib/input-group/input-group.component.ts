@@ -327,35 +327,23 @@ export class IgxInputGroupComponent extends DisplayDensityBase
         return this.type === 'box' && this._variant === 'material';
     }
 
-    /**
-     * @hidden
-     * @internal
-     */
+    /** @hidden @internal */
     public uploadButtonHandler() {
         this.input.nativeElement.click();
     }
 
-    /**
-     * @hidden
-     * @internal
-     */
+    /** @hidden @internal */
     public clearValueHandler() {
         this.input.clear();
     }
 
-    /**
-     * @hidden
-     * @internal
-     */
+    /** @hidden @internal */
     @HostBinding('class.igx-input-group--file')
     public get isFileType() {
         return this.input.type === 'file';
     }
 
-    /**
-     * @hidden
-     * @internal
-     */
+    /** @hidden @internal */
     public get fileNames() {
         return this.input.fileNames;
     }
