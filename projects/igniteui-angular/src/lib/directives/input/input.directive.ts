@@ -64,9 +64,7 @@ export enum IgxInputState {
 export class IgxInputDirective implements AfterViewInit, OnDestroy {
     private _valid = IgxInputState.INITIAL;
     private _statusChanges$: Subscription;
-    private _filePlaceholder = 'No file chosen';
-    private _fileNames = this._filePlaceholder;
-
+    private _fileNames: string;
 
     constructor(
         public inputGroup: IgxInputGroupBase,
@@ -248,10 +246,6 @@ export class IgxInputDirective implements AfterViewInit, OnDestroy {
                 .files;
             this._fileNames = Array.from(fileList).map((f: File) => f.name).join(', ');
 
-            if (!this._fileNames) {
-                this._fileNames = this._filePlaceholder;
-            }
-
             if (this.required && fileList?.length > 0) {
                 this._valid = IgxInputState.INITIAL;
             }
@@ -266,7 +260,7 @@ export class IgxInputDirective implements AfterViewInit, OnDestroy {
     /** @hidden @internal */
     public clear() {
         this.nativeElement.value = null;
-        this._fileNames = this._filePlaceholder;
+        this._fileNames = '';
         this.checkValidity();
     }
 
