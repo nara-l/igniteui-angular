@@ -33,6 +33,8 @@ import {
 import { IgxInputGroupBase } from './input-group.common';
 import { DeprecateProperty } from '../core/deprecateDecorators';
 import { IgxInputGroupType, IGX_INPUT_GROUP_TYPE } from './inputGroupType';
+import { IInputResourceStrings } from '../core/i18n/input-resources';
+import { CurrentResourceStrings } from '../core/i18n/resources';
 
 let NEXT_ID = 0;
 
@@ -60,6 +62,24 @@ export class IgxInputGroupComponent extends DisplayDensityBase
     private _type: IgxInputGroupType = null;
     private _filled = false;
     private _variant: IgxInputGroupTheme = 'material';
+
+    /**
+     * Sets the resource strings.
+     * By default it uses EN resources.
+     */
+   @Input()
+   set resourceStrings(value: IInputResourceStrings) {
+       this._resourceStrings = Object.assign({}, this._resourceStrings, value);
+   }
+
+    /**
+     * Returns the resource strings.
+     */
+    get resourceStrings(): IInputResourceStrings {
+        return this._resourceStrings;
+    }
+
+    private _resourceStrings = CurrentResourceStrings.InputResStrings;
 
     /**
      * An @Input property that sets the value of `id` attribute. If not provided it will be automatically generated.
